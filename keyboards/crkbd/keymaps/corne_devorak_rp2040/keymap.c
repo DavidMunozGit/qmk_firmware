@@ -1,7 +1,11 @@
-/*
- * Module: corne_devorak_rp2040
- * Brief : Dvorak layout with OLED UI + RGB Matrix helpers for crkbd (RP2040)
- * Notes : Structured in sections (types, macros, globals, prototypes, data, functions)
+/**
+ * @file keymap.c
+ * @brief Corne (crkbd) Dvorak keymap for RP2040 with OLED UI and RGB Matrix controls.
+ *
+ * Provides:
+ * - Dvorak base layer with NAV, SYM, and RGB layers
+ * - OLED status (Pac-Man style animation + WPM on master)
+ * - RGB Matrix convenience keycodes and suggested effect on RGB layer
  */
 
 /* ========================================================================== */
@@ -12,17 +16,25 @@
 /* ========================================================================== */
 /*                                Types                                       */
 /* ========================================================================== */
-/* Keyboard layers */
-typedef enum KB_LAYERS_E {
-    KB_LYR_DVORAK = 0U, /* Base: Dvorak */
-    KB_LYR_NAV,         /* Navigation */
-    KB_LYR_SYM,         /* Symbols */
-    KB_LYR_RGB,         /* RGB controls */
-    KB_LYR_MAX          /* Number of layers */
+/**
+ * @enum KB_LAYERS_E
+ * @brief Logical layers used by this keymap.
+ */
+typedef enum KB_LAYERS_E
+{
+    KB_LYR_DVORAK = 0U, /**< Base: Dvorak */
+    KB_LYR_NAV,         /**< Navigation */
+    KB_LYR_SYM,         /**< Symbols */
+    KB_LYR_RGB,         /**< RGB controls */
+    KB_LYR_MAX          /**< Number of layers */
 } KB_LAYERS_E;
 
-/* Custom keycodes (RGB Matrix controls) */
-typedef enum custom_keycodes_e {
+/**
+ * @enum custom_keycodes_e
+ * @brief Custom keycodes for RGB Matrix controls.
+ */
+typedef enum custom_keycodes_e
+{
     D_RGB_TOG = SAFE_RANGE,
     D_RGB_HUI,
     D_RGB_HUD,
@@ -38,8 +50,8 @@ typedef enum custom_keycodes_e {
 /*                          Private Macros/Constants                          */
 /* ========================================================================== */
 #ifdef OLED_ENABLE
-#    define ANIM_COLS        21U  /* approx columns on 128px width with default font */
-#    define ANIM_INTERVAL_MS 120U /* pac-man tick interval */
+#define ANIM_COLS        21U  /* approx columns on 128px width with default font */
+#define ANIM_INTERVAL_MS 120U /* pac-man tick interval */
 #endif
 
 /* ========================================================================== */
@@ -47,12 +59,12 @@ typedef enum custom_keycodes_e {
 /* ========================================================================== */
 #ifdef OLED_ENABLE
 static uint32_t anim_last_ms = 0U;
-static uint8_t  pac_pos_master = 0U; /* moves left->right */
-static uint8_t  pac_pos_slave  = 0U; /* moves left->right */
-static bool     pac_mouth_open = true;
-static bool     anim_inited    = false;
-static uint8_t  pellets_master[ANIM_COLS];
-static uint8_t  pellets_slave[ANIM_COLS];
+static uint8_t pac_pos_master = 0U; /* moves left->right */
+static uint8_t pac_pos_slave = 0U;  /* moves left->right */
+static bool pac_mouth_open = true;
+static bool anim_inited = false;
+static uint8_t pellets_master[ANIM_COLS];
+static uint8_t pellets_slave[ANIM_COLS];
 #endif
 
 /* ========================================================================== */
@@ -60,9 +72,9 @@ static uint8_t  pellets_slave[ANIM_COLS];
 /* ========================================================================== */
 /* QMK hooks */
 layer_state_t layer_state_set_user(layer_state_t state);
-bool          process_record_user(uint16_t keycode, keyrecord_t* record);
+bool process_record_user(uint16_t keycode, keyrecord_t *record);
 #ifdef OLED_ENABLE
-bool          oled_task_user(void);
+bool oled_task_user(void);
 #endif
 
 /* Internal helpers (OLED) */
@@ -76,6 +88,9 @@ static void render_layer(void);
 /* ========================================================================== */
 /*                              Keymap Layers                                 */
 /* ========================================================================== */
+/**
+ * @brief Keymap definition. clang-format is disabled for readability.
+ */
 /* clang-format off */
 const uint16_t PROGMEM keymaps[KB_LYR_MAX][MATRIX_ROWS][MATRIX_COLS] = {
     [KB_LYR_DVORAK] = LAYOUT_split_3x6_3(
@@ -111,14 +126,18 @@ const uint16_t PROGMEM keymaps[KB_LYR_MAX][MATRIX_ROWS][MATRIX_COLS] = {
 /* ========================================================================== */
 /*                          QMK Hook Implementations                          */
 /* ========================================================================== */
-/*
- * layer_state_set_user
- * Brief: When entering the RGB layer, suggest a mode/color (persisted).
+/**
+ * @brief Layer change callback. When entering the RGB layer, suggests a
+ *        persisted effect and color.
+ * @param state New layer state bitmask
+ * @return The (possibly modified) layer state
  */
-layer_state_t layer_state_set_user(layer_state_t state) {
+layer_state_t layer_state_set_user(layer_state_t state)
+{
 #ifdef RGB_MATRIX_ENABLE
     /* Apply only on RGB layer entry so user selections persist elsewhere. */
-    if (layer_state_cmp(state, KB_LYR_RGB)) {
+    if ( layer_state_cmp(state, KB_LYR_RGB) )
+    {
         rgb_matrix_mode(RGB_MATRIX_BREATHING); /* persisted */
         rgb_matrix_sethsv(HSV_YELLOW);         /* persisted */
     }
@@ -130,85 +149,128 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 /* ========================================================================== */
 /*                               OLED Helpers                                 */
 /* ========================================================================== */
-/* Reset animation state for the requested half. */
-static void anim_reset_half(bool is_master) {
-    if (is_master) {
+/** @brief Reset animation state for the requested half. */
+static void anim_reset_half(bool is_master)
+{
+    if ( is_master )
+    {
         pac_pos_master = 0U;
-        for (uint8_t i = 0U; i < ANIM_COLS; ++i) pellets_master[i] = 1U;
-    } else {
+        for ( uint8_t i = 0U; i < ANIM_COLS; ++i ) pellets_master[i] = 1U;
+    }
+    else
+    {
         pac_pos_slave = 0U;
-        for (uint8_t i = 0U; i < ANIM_COLS; ++i) pellets_slave[i] = 1U;
+        for ( uint8_t i = 0U; i < ANIM_COLS; ++i ) pellets_slave[i] = 1U;
     }
 }
 
-/* Clear a full text row. */
-static void anim_clear_line(uint8_t row) {
+/** @brief Clear a full text row on the OLED. */
+static void anim_clear_line(uint8_t row)
+{
     oled_set_cursor(0, row);
-    for (uint8_t i = 0U; i < ANIM_COLS; ++i) oled_write_P(PSTR(" "), false);
+    for ( uint8_t i = 0U; i < ANIM_COLS; ++i ) oled_write_P(PSTR(" "), false);
 }
 
-/* Advance state and draw a pac-man line for master/slave halves. */
-static void render_pacman_line(bool is_master) {
-    if (!anim_inited) {
+/** @brief Advance state and draw a pac-man line for master/slave halves. */
+static void render_pacman_line(bool is_master)
+{
+    if ( !anim_inited )
+    {
         anim_reset_half(true);
         anim_reset_half(false);
         anim_inited = true;
     }
 
-    if (timer_elapsed32(anim_last_ms) >= ANIM_INTERVAL_MS) {
-        anim_last_ms   = timer_read32();
+    if ( timer_elapsed32(anim_last_ms) >= ANIM_INTERVAL_MS )
+    {
+        anim_last_ms = timer_read32();
         pac_mouth_open = !pac_mouth_open;
 
-        if (is_master) {
-            if ((pac_pos_master + 1U) < ANIM_COLS) pac_pos_master++;
+        if ( is_master )
+        {
+            if ( (pac_pos_master + 1U) < ANIM_COLS )
+                pac_pos_master++;
             pellets_master[pac_pos_master] = 0U; /* eat pellet */
 
             bool any_left = false;
-            for (uint8_t i = 0U; i < ANIM_COLS; ++i) {
-                if (pellets_master[i] != 0U) { any_left = true; break; }
+            for ( uint8_t i = 0U; i < ANIM_COLS; ++i )
+            {
+                if ( pellets_master[i] != 0U )
+                {
+                    any_left = true;
+                    break;
+                }
             }
-            if (!any_left) anim_reset_half(true);
-        } else {
-            if ((pac_pos_slave + 1U) < ANIM_COLS) pac_pos_slave++;
+            if ( !any_left )
+                anim_reset_half(true);
+        }
+        else
+        {
+            if ( (pac_pos_slave + 1U) < ANIM_COLS )
+                pac_pos_slave++;
             pellets_slave[pac_pos_slave] = 0U;
 
             bool any_left = false;
-            for (uint8_t i = 0U; i < ANIM_COLS; ++i) {
-                if (pellets_slave[i] != 0U) { any_left = true; break; }
+            for ( uint8_t i = 0U; i < ANIM_COLS; ++i )
+            {
+                if ( pellets_slave[i] != 0U )
+                {
+                    any_left = true;
+                    break;
+                }
             }
-            if (!any_left) anim_reset_half(false);
+            if ( !any_left )
+                anim_reset_half(false);
         }
     }
 
     /* Draw current frame */
     anim_clear_line(0U);
     oled_set_cursor(0, 0);
-    for (uint8_t col = 0U; col < ANIM_COLS; ++col) {
+    for ( uint8_t col = 0U; col < ANIM_COLS; ++col )
+    {
         bool is_pac = is_master ? (col == pac_pos_master) : (col == pac_pos_slave);
-        if (is_pac) {
+        if ( is_pac )
+        {
             char ch = pac_mouth_open ? 'C' : 'O'; /* pac glyph */
             oled_write_char(ch, false);
-        } else {
+        }
+        else
+        {
             bool pellet = is_master ? (pellets_master[col] != 0U) : (pellets_slave[col] != 0U);
             oled_write_P(pellet ? PSTR(".") : PSTR(" "), false);
         }
     }
 }
 
-/* Write layer label. */
-static void render_layer(void) {
+/** @brief Write the current layer label. */
+static void render_layer(void)
+{
     oled_write_ln_P(PSTR("Layer:"), false);
-    if (layer_state_cmp(layer_state, KB_LYR_RGB)) { oled_write_ln_P(PSTR("RGB"), false); return; }
-    if (layer_state_cmp(layer_state, KB_LYR_SYM)) { oled_write_ln_P(PSTR("SYM"), false); return; }
-    if (layer_state_cmp(layer_state, KB_LYR_NAV)) { oled_write_ln_P(PSTR("NAV"), false); return; }
+    if ( layer_state_cmp(layer_state, KB_LYR_RGB) )
+    {
+        oled_write_ln_P(PSTR("RGB"), false);
+        return;
+    }
+    if ( layer_state_cmp(layer_state, KB_LYR_SYM) )
+    {
+        oled_write_ln_P(PSTR("SYM"), false);
+        return;
+    }
+    if ( layer_state_cmp(layer_state, KB_LYR_NAV) )
+    {
+        oled_write_ln_P(PSTR("NAV"), false);
+        return;
+    }
     oled_write_ln_P(PSTR("BASE"), false);
 }
 
-/*
- * oled_task_user
- * Brief: Draw animation + status (layer, WPM) on master; simple marker on slave.
+/**
+ * @brief OLED frame task. Draws animation and status panel.
+ * @return false to allow default handling to continue
  */
-bool oled_task_user(void) {
+bool oled_task_user(void)
+{
     oled_clear();
     bool master = is_keyboard_master();
 
@@ -216,38 +278,69 @@ bool oled_task_user(void) {
     render_pacman_line(master);
 
     /* Rows 1-2: status panel */
-    if (master) {
-        oled_set_cursor(0, 1); oled_write_P(PSTR("Corne Dv"), false);
-        oled_set_cursor(0, 2); render_layer();
+    if ( master )
+    {
+        oled_set_cursor(0, 1);
+        oled_write_P(PSTR("Corne Dv"), false);
+        oled_set_cursor(0, 2);
+        render_layer();
         char wpm_str[16];
         snprintf(wpm_str, sizeof(wpm_str), "WPM:%3u", get_current_wpm());
         oled_write_ln(wpm_str, false);
-    } else {
-        oled_set_cursor(0, 1); oled_write_P(PSTR("Slave"), false);
-        oled_set_cursor(0, 2); oled_write_P(PSTR("<anim>"), false);
+    }
+    else
+    {
+        oled_set_cursor(0, 1);
+        oled_write_P(PSTR("Slave"), false);
+        oled_set_cursor(0, 2);
+        oled_write_P(PSTR("<anim>"), false);
     }
     return false;
 }
 #endif /* OLED_ENABLE */
 
-/*
- * process_record_user
- * Brief: Handle custom RGB Matrix keycodes.
+/**
+ * @brief Handle custom RGB Matrix keycodes.
+ * @param keycode keycode value
+ * @param record key event record
+ * @return false if handled; true to propagate
  */
-bool process_record_user(uint16_t keycode, keyrecord_t* record) {
+bool process_record_user(uint16_t keycode, keyrecord_t *record)
+{
 #ifdef RGB_MATRIX_ENABLE
-    if (record->event.pressed) {
-        switch (keycode) {
-            case D_RGB_TOG:  rgb_matrix_toggle();          return false;
-            case D_RGB_HUI:  rgb_matrix_increase_hue();    return false;
-            case D_RGB_HUD:  rgb_matrix_decrease_hue();    return false;
-            case D_RGB_SAI:  rgb_matrix_increase_sat();    return false;
-            case D_RGB_SAD:  rgb_matrix_decrease_sat();    return false;
-            case D_RGB_VAI:  rgb_matrix_increase_val();    return false;
-            case D_RGB_VAD:  rgb_matrix_decrease_val();    return false;
-            case D_RGB_MOD:  rgb_matrix_step();            return false;
-            case D_RGB_RMOD: rgb_matrix_step_reverse();    return false;
-            default: break;
+    if ( record->event.pressed )
+    {
+        switch ( keycode )
+        {
+        case D_RGB_TOG:
+            rgb_matrix_toggle();
+            return false;
+        case D_RGB_HUI:
+            rgb_matrix_increase_hue();
+            return false;
+        case D_RGB_HUD:
+            rgb_matrix_decrease_hue();
+            return false;
+        case D_RGB_SAI:
+            rgb_matrix_increase_sat();
+            return false;
+        case D_RGB_SAD:
+            rgb_matrix_decrease_sat();
+            return false;
+        case D_RGB_VAI:
+            rgb_matrix_increase_val();
+            return false;
+        case D_RGB_VAD:
+            rgb_matrix_decrease_val();
+            return false;
+        case D_RGB_MOD:
+            rgb_matrix_step();
+            return false;
+        case D_RGB_RMOD:
+            rgb_matrix_step_reverse();
+            return false;
+        default:
+            break;
         }
     }
 #endif

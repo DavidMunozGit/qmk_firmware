@@ -1,3 +1,8 @@
+<!--
+ @file readme.md
+ @brief Overview and usage notes for the corne_devorak_rp2040 keymap.
+-->
+
 ## corne_devorak_rp2040
 
 Personal Dvorak layout for Corne (crkbd) using RP2040 Pro Micro-compatible controllers.
