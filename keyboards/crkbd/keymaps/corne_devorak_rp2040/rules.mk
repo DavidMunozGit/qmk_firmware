@@ -1,14 +1,16 @@
-# Target RP2040 Pro Micro-style boards
+###############################################################################
+# corne_devorak_rp2040: keymap rules
+###############################################################################
+
+# Target: RP2040 Pro Micro-compatible (SparkFun Pro Micro RP2040)
 CONVERT_TO = sparkfun_pm2040
 
-# Feature set
+# Core features
 CONSOLE_ENABLE = no
 
-# IMPORTANT: You cannot use RGBLIGHT and RGB Matrix (WS2812) at the same time.
-# We'll use RGB Matrix for per-key/underglow because that provide better 
-# animation and as we are using RP2040 they are smoothly handled.
+# RGB: Matrix vs. RGBlight (mutually exclusive) — we pick Matrix
 RGB_MATRIX_ENABLE = yes
-RGBLIGHT_ENABLE = no
+RGBLIGHT_ENABLE   = no
 
 # OLED display support
 OLED_ENABLE = yes
