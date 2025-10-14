@@ -25,22 +25,22 @@ BinPackArguments: false
 BinPackParameters: false
 #BreakBeforeBraces: Custom
 BraceWrapping:
-	AfterCaseLabel:  true
-	AfterClass:      true
-	AfterControlStatement: Always
-	AfterEnum:       true
-	AfterFunction:   true
-	AfterNamespace:  true
-	AfterObjCDeclaration: true
-	AfterStruct:     true
-	AfterUnion:      true
-	AfterExternBlock: true
-	BeforeCatch:     true
-	BeforeElse:      true
-	IndentBraces:    false
-	SplitEmptyFunction: false
-	SplitEmptyRecord: false
-	SplitEmptyNamespace: false
+  AfterCaseLabel:  true
+  AfterClass:      true
+  AfterControlStatement: Always
+  AfterEnum:       true
+  AfterFunction:   true
+  AfterNamespace:  true
+  AfterObjCDeclaration: true
+  AfterStruct:     true
+  AfterUnion:      true
+  AfterExternBlock: true
+  BeforeCatch:     true
+  BeforeElse:      true
+  IndentBraces:    false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Allman
 BreakBeforeInheritanceComma: false
@@ -61,9 +61,9 @@ DerivePointerAlignment: false
 DisableFormat:   false
 FixNamespaceComments: false
 ForEachMacros:
-	- foreach
-	- Q_FOREACH
-	- BOOST_FOREACH
+  - foreach
+  - Q_FOREACH
+  - BOOST_FOREACH
 IncludeBlocks:   Preserve
 IndentCaseLabels: false
 IndentGotoLabels: false
@@ -112,9 +112,8 @@ SpacesInSquareBrackets: false
 SpaceBeforeSquareBrackets: false
 Standard:        Latest
 StatementMacros:
-	- QT_REQUIRE_VERSION
-	- Q_UNUSED
+  - QT_REQUIRE_VERSION
+  - Q_UNUSED
 TabWidth: 4
 UseCRLF: true
 UseTab: Never
-...
