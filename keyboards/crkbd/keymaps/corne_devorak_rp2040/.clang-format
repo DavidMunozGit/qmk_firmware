@@ -1,0 +1,11 @@
+# Local clang-format for corne_devorak_rp2040 keymap
+# Paste your preferred style here (was previously at /home/dmunoz/Temporal_JSS/R2S/Application/.clang-format).
+# This placeholder keeps things working until you paste the full style.
+
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+BreakBeforeBraces: Linux
+AllowShortFunctionsOnASingleLine: Inline
+ColumnLimit: 0
