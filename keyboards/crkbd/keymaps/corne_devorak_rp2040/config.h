@@ -27,6 +27,8 @@
 /* Enable full RGB Matrix feature sets required by many effects */
 #define RGB_MATRIX_KEYPRESSES              /* Enable keypress reactive effects */
 #define RGB_MATRIX_FRAMEBUFFER_EFFECTS     /* Enable framebuffer-based effects */
+/* Enable mode names helper for OLED display */
+#define RGB_MATRIX_MODE_NAME_ENABLE        /* enables rgb_matrix_get_mode_name() */
 
 /* Enable ALL core RGB Matrix effects (order is defined by rgb_matrix_effects.inc) */
 /* Static/gradient/cycle effects */
@@ -94,6 +96,9 @@
 /* ===================== Split Mirroring/Transport ========================== */
 #define SPLIT_WPM_ENABLE
 #define SPLIT_OLED_ENABLE
+/* Ensure layer and modifier state are mirrored to the slave (right) half */
+#define SPLIT_LAYER_STATE_ENABLE
+#define SPLIT_MODS_ENABLE
 
 /* ============================ Unicode Mode =============================== */
 /* Default Unicode input modes for Windows host via WSL: WinCompose first, Linux second */

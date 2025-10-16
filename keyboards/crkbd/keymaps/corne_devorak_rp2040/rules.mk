@@ -34,7 +34,7 @@ UNICODE_ENABLE = no
 UNICODEMAP_ENABLE = yes
 # UCIS can be used instead of UNICODEMAP, but not together. Leave disabled by default.
 # UCIS_ENABLE = yes
-AUTO_SHIFT_ENABLE = yes
+AUTO_SHIFT_ENABLE = no
 GRAVE_ESC_ENABLE = yes
 KEY_LOCK_ENABLE = yes
 DEFERRED_EXEC_ENABLE = yes
