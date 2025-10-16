@@ -290,47 +290,75 @@ bool oled_task_user(void)
 
     oled_clear();
 
-    /* Row 0 */
-    (void)snprintf(line, sizeof(line), "ID:%s Layer:%s",
-                   (is_keyboard_master() ? "Left" : "Right"),
-                   layer_name);
-    pad_or_trunc_to_oled_cols(line);
-    oled_set_cursor(0, 0);
-    oled_write_ln(line, false);
-
-    /* Row 1 */
-#ifdef RGB_MATRIX_ENABLE
+    if ( is_keyboard_master() )
     {
-        const char *onoff = (rgb_matrix_config.enable != 0U) ? "On" : "Off";
-        const char *mode_name = rgb_matrix_get_mode_name(rgb_matrix_get_mode());
-        (void)snprintf(line, sizeof(line), "RGB:%s  Mode:%s", onoff, mode_name);
-    }
-#else
-    (void)snprintf(line, sizeof(line), "RGB:%s  Mode:%s", "Off", "N/A");
-#endif
-    pad_or_trunc_to_oled_cols(line);
-    oled_set_cursor(0, 1);
-    oled_write_ln(line, false);
+        /* LEFT (master) */
+        /* Row 0: Left Layer <name> */
+        (void)snprintf(line, sizeof(line), "Left Layer %s", layer_name);
+        pad_or_trunc_to_oled_cols(line);
+        oled_set_cursor(0, 0);
+        oled_write_ln(line, false);
 
-    /* Row 2 */
+        /* Row 1: RGB Mode:<name> */
 #ifdef RGB_MATRIX_ENABLE
-    (void)snprintf(line, sizeof(line), "Hue:%02X Sat:%02X Val:%02X",
-                   (unsigned int)rgb_matrix_config.hsv.h,
-                   (unsigned int)rgb_matrix_config.hsv.s,
-                   (unsigned int)rgb_matrix_config.hsv.v);
+        {
+            const char *mode_name = rgb_matrix_get_mode_name(rgb_matrix_get_mode());
+            (void)snprintf(line, sizeof(line), "RGB Mode:%s", mode_name);
+        }
 #else
-    (void)snprintf(line, sizeof(line), "Hue:%02X Sat:%02X Val:%02X", 0U, 0U, 0U);
+        (void)snprintf(line, sizeof(line), "RGB Mode:%s", "N/A");
 #endif
-    pad_or_trunc_to_oled_cols(line);
-    oled_set_cursor(0, 2);
-    oled_write_ln(line, false);
+        pad_or_trunc_to_oled_cols(line);
+        oled_set_cursor(0, 1);
+        oled_write_ln(line, false);
 
-    /* Row 3: leave text blank, draw animation at bottom-right */
-    memset(line, ' ', OLED_COLS);
-    line[OLED_COLS] = '\0';
-    oled_set_cursor(0, 3);
-    oled_write(line, false);
-    draw_stick_bottom_right();
+        /* Row 2: Hue:FF Sat:FF Val:FF */
+#ifdef RGB_MATRIX_ENABLE
+        (void)snprintf(line, sizeof(line), "Hue:%02X Sat:%02X Val:%02X",
+                       (unsigned int)rgb_matrix_config.hsv.h,
+                       (unsigned int)rgb_matrix_config.hsv.s,
+                       (unsigned int)rgb_matrix_config.hsv.v);
+#else
+        (void)snprintf(line, sizeof(line), "Hue:%02X Sat:%02X Val:%02X", 0U, 0U, 0U);
+#endif
+        pad_or_trunc_to_oled_cols(line);
+        oled_set_cursor(0, 2);
+        oled_write_ln(line, false);
+
+        /* Row 3: Empty */
+        memset(line, ' ', OLED_COLS);
+        line[OLED_COLS] = '\0';
+        oled_set_cursor(0, 3);
+        oled_write(line, false);
+    }
+    else
+    {
+        /* RIGHT (slave) */
+        /* Row 0: Right Layer <name> */
+        (void)snprintf(line, sizeof(line), "Right Layer %s", layer_name);
+        pad_or_trunc_to_oled_cols(line);
+        oled_set_cursor(0, 0);
+        oled_write_ln(line, false);
+
+        /* Row 1: Empty */
+        memset(line, ' ', OLED_COLS);
+        line[OLED_COLS] = '\0';
+        oled_set_cursor(0, 1);
+        oled_write(line, false);
+
+        /* Row 2: Empty */
+        memset(line, ' ', OLED_COLS);
+        line[OLED_COLS] = '\0';
+        oled_set_cursor(0, 2);
+        oled_write(line, false);
+
+        /* Row 3: 8x8 animation bottom-right */
+        memset(line, ' ', OLED_COLS);
+        line[OLED_COLS] = '\0';
+        oled_set_cursor(0, 3);
+        oled_write(line, false);
+        draw_stick_bottom_right();
+    }
 
     return false;
 }
@@ -356,28 +384,41 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
             result = false;
             break;
         case D_RGB_HUI:
-            rgb_matrix_increase_hue();
-            result = false;
-            break;
         case D_RGB_HUD:
-            rgb_matrix_decrease_hue();
-            result = false;
-            break;
         case D_RGB_SAI:
-            rgb_matrix_increase_sat();
-            result = false;
-            break;
         case D_RGB_SAD:
-            rgb_matrix_decrease_sat();
-            result = false;
-            break;
         case D_RGB_VAI:
-            rgb_matrix_increase_val();
-            result = false;
-            break;
         case D_RGB_VAD:
-            rgb_matrix_decrease_val();
+        {
+            /* Adjust HSV in steps of 5, clamped to 0..255 */
+            hsv_t hsv = rgb_matrix_get_hsv();
+            const uint8_t step = 5U;
+            switch ( keycode )
+            {
+            case D_RGB_HUI:
+                hsv.h = (uint8_t)(hsv.h + step);
+                break;
+            case D_RGB_HUD:
+                hsv.h = (uint8_t)(hsv.h - step);
+                break;
+            case D_RGB_SAI:
+                hsv.s = (uint8_t)((hsv.s + step > 255U) ? 255U : (hsv.s + step));
+                break;
+            case D_RGB_SAD:
+                hsv.s = (uint8_t)((hsv.s < step) ? 0U : (hsv.s - step));
+                break;
+            case D_RGB_VAI:
+                hsv.v = (uint8_t)((hsv.v + step > 255U) ? 255U : (hsv.v + step));
+                break;
+            case D_RGB_VAD:
+                hsv.v = (uint8_t)((hsv.v < step) ? 0U : (hsv.v - step));
+                break;
+            default:
+                break;
+            }
+            rgb_matrix_sethsv(hsv.h, hsv.s, hsv.v);
             result = false;
+        }
             break;
         case D_RGB_MOD:
             rgb_matrix_step();
