@@ -8,6 +8,9 @@
  * - RGB Matrix convenience keycodes and suggested effect on RGB layer
  */
 
+ /* Helper for compilation:
+  * bash -lc 'cd /home/dmunoz/Keyboard/qmk_firmware && make -j4 crkbd:corne_devorak_rp2040 CONVERT_TO=sparkfun_pm2040' */
+
 /* ========================================================================== */
 /*                                Includes                                    */
 /* ========================================================================== */
@@ -50,6 +53,8 @@ typedef enum KB_LAYERS_E
     KB_LYR_DVORAK = 0U, /**< Base: Dvorak */
     KB_LYR_NUMS,        /**< Numbers */
     KB_LYR_SYM,         /**< Symbols */
+    KB_LYR_NAV,         /**< Navigation & editor shortcuts */
+    KB_LYR_FUNC,        /**< Function keys (F1–F12) and media */
     KB_LYR_RGB,         /**< RGB controls */
     KB_LYR_MAX          /**< Number of layers */
 } KB_LAYERS_E;
@@ -69,6 +74,9 @@ typedef enum custom_keycodes_e
     D_RGB_VAD,
     D_RGB_MOD,
     D_RGB_RMOD,
+    D_ANIM_NEXT,  /**< Cycle to next OLED animation */
+    D_ANIM_PREV,  /**< Cycle to previous OLED animation */
+    D_ANIM_MODE   /**< Toggle full-screen animation mode */
 } custom_keycodes_e;
 
 /* ========================================================================== */
@@ -84,31 +92,45 @@ typedef enum custom_keycodes_e
 /* clang-format off */
 const uint16_t PROGMEM keymaps[KB_LYR_MAX][MATRIX_ROWS][MATRIX_COLS] = {
     [KB_LYR_DVORAK] = LAYOUT_split_3x6_3(
-        KC_TAB,  KC_QUOT, KC_COMM, KC_DOT,  KC_P,   KC_Y,                      KC_F,   KC_G,   KC_C,   KC_R,   KC_L,   KC_BSPC,
-        KC_LCTL, KC_A,    KC_O,    KC_E,    KC_U,   KC_I,                      KC_D,   KC_H,   KC_T,   KC_N,   KC_S,   KC_SLSH,
-        KC_LSFT, KC_SCLN, KC_Q,    KC_J,    KC_K,   KC_X,                      KC_B,   KC_M,   KC_W,   KC_V,   KC_Z,   KC_ESC,
-                        KC_LGUI, MO(KB_LYR_NUMS), KC_SPC,                      KC_ENT, MO(KB_LYR_SYM), KC_RALT
+        KC_ESC,  KC_QUOT, KC_COMM, KC_DOT,  KC_P,   KC_Y,                      KC_F,   KC_G,   KC_C,   KC_R,   KC_L,   KC_BSPC,
+        MT(MOD_LSFT, KC_TAB), KC_A,    KC_O,    KC_E,    KC_U,   KC_I,         KC_D,   KC_H,   KC_T,   KC_N,   KC_S,   KC_DEL,
+        KC_LCTL, KC_SCLN, KC_Q,    KC_J,    KC_K,   KC_X,                      KC_B,   KC_M,   KC_W,   KC_V,   KC_Z,   KC_SLSH,
+            KC_LGUI, MO(KB_LYR_NUMS), LT(KB_LYR_NAV, KC_SPC),                  LT(KB_LYR_FUNC, KC_ENT), LT(KB_LYR_SYM, S(KC_LBRC)), MT(MOD_RALT, S(KC_RBRC))
     ),
 
     [KB_LYR_NUMS] = LAYOUT_split_3x6_3(
-        _______, _______, KC_LPRN, KC_RPRN, _______, _______,                  KC_PAST, KC_P7,  KC_P8,  KC_P9,  KC_PSLS, KC_BSPC,
-        _______, _______, KC_UNDS, KC_PIPE, _______, _______,                  KC_PDOT, KC_P4,  KC_P5,  KC_P6,  KC_PMNS, KC_PENT,
-        _______, _______, _______, _______, _______, _______,                  KC_P0,   KC_P1,  KC_P2,  KC_P3,  KC_PPLS, KC_BSLS,
-                                   _______, XXXXXXX, _______,                  KC_EQL,  MO(KB_LYR_RGB), _______
+        KC_ESC,  _______, KC_LPRN, KC_RPRN, _______, _______,                  KC_PAST, KC_P7,  KC_P8,  KC_P9,  KC_PSLS, KC_BSPC,
+        MT(MOD_LSFT, KC_TAB), _______, KC_UNDS, KC_PIPE, _______, _______,     KC_PDOT, KC_P4,  KC_P5,  KC_P6,  KC_PMNS, KC_PENT,
+        KC_LCTL, _______, _______, _______, _______, _______,                  KC_EQL,  KC_P1,  KC_P2,  KC_P3,  KC_PPLS, KC_BSLS,
+                                   KC_LGUI, XXXXXXX, _______,                  KC_PENT,  LT(KB_LYR_RGB, KC_P0), KC_RALT
     ),
 
     [KB_LYR_SYM] = LAYOUT_split_3x6_3(
-        _______, KC_EXLM, KC_AT,   KC_HASH, KC_DLR, KC_PERC,                    KC_CIRC,KC_AMPR,KC_ASTR,KC_LPRN,KC_RPRN,KC_DEL,
-        _______, _______, _______,  _______, _______, _______,                   KC_MINS,KC_EQL, KC_LBRC,KC_RBRC,KC_BSLS,KC_GRV,
-        _______, _______, _______,  _______, _______, _______,                   KC_UNDS,KC_PLUS,KC_LCBR,KC_RCBR,KC_PIPE,KC_TILD,
-                                  _______, MO(KB_LYR_RGB), _______,             _______,_______,_______
+        KC_ESC,  _______, _______, _______, _______, _______,                  _______, S(KC_7), S(KC_8), S(KC_9), S(KC_0), KC_BSPC,
+        MT(MOD_LSFT, KC_TAB), KC_LCBR,  KC_RCBR,  KC_LBRC,  KC_RBRC,  KC_PIPE, KC_BSLS, S(KC_4), S(KC_5), S(KC_6), S(KC_QUOT), KC_DEL,
+        KC_LCTL, S(KC_COMM), S(KC_DOT), KC_MINS, KC_EQL, KC_SLSH,              S(KC_SLSH), S(KC_1), S(KC_2), S(KC_3), KC_GRV,  KC_QUOT,
+                                _______, _______, _______,                     _______, XXXXXXX, KC_RALT
+    ),
+
+    [KB_LYR_NAV] = LAYOUT_split_3x6_3(
+        KC_ESC,  _______, _______, _______, _______, _______,                  KC_INS, KC_HOME, KC_UP,   KC_END,  KC_PGUP, KC_BSPC,
+        MT(MOD_LSFT, KC_TAB), _______, _______, _______, _______, _______,     C(KC_LEFT), KC_LEFT, KC_DOWN, KC_RGHT, C(KC_RGHT), _______,
+        KC_LCTL, _______, _______, _______, _______, _______,                  C(KC_X), C(S(KC_UP)), C(S(KC_BSLS)), C(S(KC_DOWN)), KC_PGDN, KC_ENT,
+                                   KC_LGUI, _______, XXXXXXX,                  C(KC_C), _______, MT(MOD_RALT, C(KC_V))
+    ),
+
+    [KB_LYR_FUNC] = LAYOUT_split_3x6_3(
+        KC_ESC,  _______,  _______,  _______,  _______, KC_MNXT,               KC_VOLU, KC_F7,  KC_F8,  KC_F9,  KC_F12, _______,
+        MT(MOD_LSFT, KC_TAB), _______, _______, _______, _______, KC_MPRV,     KC_VOLD, KC_F4,  KC_F5,  KC_F6,  KC_F11, _______,
+        KC_LCTL, _______, _______, _______, _______, _______,                  KC_MUTE, KC_F1,  KC_F2,  KC_F3,  KC_F10, _______,
+                                   KC_LGUI, _______, _______,                  XXXXXXX, KC_MPLY, KC_RALT
     ),
 
     [KB_LYR_RGB] = LAYOUT_split_3x6_3(
-        _______, D_RGB_TOG, D_RGB_HUI, D_RGB_SAI, D_RGB_VAI, D_RGB_MOD,         _______,_______,_______,_______,_______,_______,
-        _______, D_RGB_RMOD, D_RGB_HUD, D_RGB_SAD, D_RGB_VAD, _______,          _______,_______,_______,_______,_______,_______,
-        _______, _______,    _______,    _______,    _______,    _______,        _______,_______,_______,_______,_______,_______,
-                                  _______, _______, _______,                    _______,_______,_______
+        KC_ESC,  D_RGB_TOG, D_RGB_HUI, D_RGB_SAI, D_RGB_VAI, D_RGB_MOD,                 _______, _______, _______, _______, _______, _______,
+        MT(MOD_LSFT, KC_TAB), D_RGB_RMOD, D_RGB_HUD, D_RGB_SAD, D_RGB_VAD,  _______,    _______, D_ANIM_MODE, D_ANIM_PREV, D_ANIM_NEXT, _______, _______,
+        KC_LCTL, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
+                                   KC_LGUI, XXXXXXX, _______,                           _______, XXXXXXX, KC_RALT
     )
 };
 /* clang-format on */
@@ -135,37 +157,41 @@ bool oled_task_user(void);
 #define OLED_COLS              (21U)
 #define OLED_ROWS              (4U)
 
-/* ---------------------------- Stick animation ---------------------------- */
-#define STICK_W                (8U)
-#define STICK_H                (8U)
-#define ANIM_INTERVAL_MS       (200U)
-
-/* Two very small 8x8 stick-figure frames to "walk" */
-static const uint8_t PROGMEM g_stick_frame0[STICK_W] = {
-    /* Each byte is a vertical column of 8 pixels (LSB at top) */
-    0x00U, /* ........ */
-    0x18U, /* ...XX... head/torso */
-    0x18U, /* ...XX... */
-    0x18U, /* ...XX... torso */
-    0x24U, /* ..X..X.. arms */
-    0x24U, /* ..X..X.. */
-    0x42U, /* .X....X. legs pose A */
-    0x00U  /* ........ */
-};
-
-static const uint8_t PROGMEM g_stick_frame1[STICK_W] = {
-    0x00U, /* ........ */
-    0x18U, /* ...XX... head/torso */
-    0x18U, /* ...XX... */
-    0x18U, /* ...XX... torso */
-    0x24U, /* ..X..X.. arms */
-    0x24U, /* ..X..X.. */
-    0x81U, /* X......X legs pose B */
-    0x00U  /* ........ */
-};
-
+/* ---------------------------- Animation timing --------------------------- */
+#define ANIM_INTERVAL_MS       (120U)
 static uint32_t g_anim_timer = 0U;
-static uint8_t  g_anim_frame = 0U; /* 0 or 1 */
+
+/* -------------------------- Animation Framework -------------------------- */
+#define OLED_CELL_W            (6U) /* Default font cell width */
+
+typedef enum oled_anim_type_e {
+    OLED_ANIM_PACMAN = 0U,
+    OLED_ANIM_WAVE,
+    OLED_ANIM_SPARKLE,
+    OLED_ANIM_GRADIENT,
+    OLED_ANIM_COUNT
+} oled_anim_type_e;
+
+static uint8_t  g_oled_anim = OLED_ANIM_PACMAN; /* current animation selection */
+static bool     g_anim_fullscreen = false;      /* when true: animation replaces all text */
+static uint32_t g_anim_frame = 0U;              /* monotonically incremented frame counter */
+
+/* Pac-Man assets (kept as one animation option) */
+#define PAC_W                  (OLED_CELL_W)
+#define PAC_TRAIL_STEPS        (OLED_COLS + 3U)
+static const uint8_t g_pac_open[PAC_W] = { 0x3CU, 0x7EU, 0xE6U, 0xC0U, 0x7EU, 0x3CU };
+static const uint8_t g_pac_closed[PAC_W] = { 0x3CU, 0x7EU, 0xE6U, 0xE6U, 0x7EU, 0x3CU };
+static uint8_t g_pac_step = 0U;  /* 0..PAC_TRAIL_STEPS-1 */
+static uint8_t g_pac_mouth = 0U; /* 0=open, 1=closed */
+
+/* Wave animation state */
+static uint8_t g_wave_phase = 0U; /* increments over time */
+
+/* Sparkle animation state (simple LFSR pseudo-random) */
+static uint16_t g_spark_lfsr = 0xACE1U; /* seed */
+
+/* Gradient animation state (hue shift) */
+static uint8_t g_grad_offset = 0U;
 
 /* ------------------------------- Formatting ------------------------------ */
 /**
@@ -211,6 +237,12 @@ static const char *get_layer_name(uint8_t layer_id)
     case KB_LYR_SYM:
         name = "SYM";
         break;
+    case KB_LYR_NAV:
+        name = "NAV";
+        break;
+    case KB_LYR_FUNC:
+        name = "FN";
+        break;
     case KB_LYR_RGB:
         name = "RGB";
         break;
@@ -224,25 +256,141 @@ static const char *get_layer_name(uint8_t layer_id)
 /**
  * @brief Draw a single 8x8 stick figure frame at bottom-right.
  */
-static void draw_stick_bottom_right(void)
+/* (stick-figure animation removed in favor of Pac-Man row) */
+
+/**
+ * @brief Draw Pac-Man animation across row 3 on the right OLED.
+ * - Fill with 21 cells of food (one middle pixel per cell)
+ * - Draw Pac-Man (open/closed) at current cell, facing right
+ * - Advance and wrap with an out-of-bounds illusion
+ */
+static void draw_anim_row(uint8_t row)
 {
-    /* Update frame based on time */
+    /* Throttle frame updates */
     if ( timer_elapsed32(g_anim_timer) > ANIM_INTERVAL_MS )
     {
         g_anim_timer = timer_read32();
-        g_anim_frame ^= 1U;
+        ++g_anim_frame;
+        /* Per-animation state advance */
+        switch ( g_oled_anim )
+        {
+        case OLED_ANIM_PACMAN:
+            if ( g_pac_step < OLED_COLS )
+            {
+                g_pac_mouth ^= 1U;
+            }
+            g_pac_step = (uint8_t)((g_pac_step + 1U) % PAC_TRAIL_STEPS);
+            break;
+        case OLED_ANIM_WAVE:
+            g_wave_phase = (uint8_t)(g_wave_phase + 1U);
+            break;
+        case OLED_ANIM_SPARKLE:
+            /* LFSR update: taps 16,14,13,11 */
+            {
+                uint16_t lsb = (uint16_t)(((g_spark_lfsr >> 0U) ^ (g_spark_lfsr >> 2U) ^ (g_spark_lfsr >> 3U) ^ (g_spark_lfsr >> 5U)) & 1U);
+                g_spark_lfsr = (uint16_t)((g_spark_lfsr >> 1U) | (lsb << 15U));
+            }
+            break;
+        case OLED_ANIM_GRADIENT:
+            g_grad_offset = (uint8_t)(g_grad_offset + 1U);
+            break;
+        default:
+            break;
+        }
     }
 
-    /* Place at last column (will exactly fit within 128px wide area) */
-    oled_set_cursor((uint8_t)(OLED_COLS - 1U), (uint8_t)(OLED_ROWS - 1U));
-    if ( g_anim_frame == 0U )
+    uint8_t row_buf[OLED_COLS * OLED_CELL_W];
+    memset(row_buf, 0, sizeof(row_buf));
+
+    switch ( g_oled_anim )
     {
-        oled_write_raw_P((const char *)g_stick_frame0, STICK_W);
-    }
-    else
+    case OLED_ANIM_PACMAN:
     {
-        oled_write_raw_P((const char *)g_stick_frame1, STICK_W);
+        uint8_t active_col = (g_pac_step < OLED_COLS) ? g_pac_step : 0xFFU;
+        for ( uint8_t col = 0U; col < OLED_COLS; ++col )
+        {
+            uint8_t *cell = &row_buf[col * OLED_CELL_W];
+            if ( col == active_col )
+            {
+                const uint8_t *glyph = (g_pac_mouth == 0U) ? g_pac_open : g_pac_closed;
+                memcpy(cell, glyph, PAC_W);
+            }
+            else
+            {
+                const uint8_t dot_mask = 0x18U; /* pellet */
+                cell[OLED_CELL_W / 2U] = dot_mask;
+            }
+        }
     }
+        break;
+    case OLED_ANIM_WAVE:
+    {
+        /* Simple vertical sine-ish representation using three brightness levels */
+        for ( uint8_t col = 0U; col < OLED_COLS; ++col )
+        {
+            uint8_t phase = (uint8_t)(col + g_wave_phase);
+            uint8_t level = (uint8_t)(phase & 0x0FU); /* 0..15 */
+            uint8_t *cell = &row_buf[col * OLED_CELL_W];
+            uint8_t pattern = 0x00U;
+            if ( level < 5U )
+            {
+                pattern = 0x10U; /* faint */
+            }
+            else if ( level < 10U )
+            {
+                pattern = 0x38U; /* medium */
+            }
+            else
+            {
+                pattern = 0x7CU; /* bright */
+            }
+            cell[2U] = pattern; /* middle vertical slice */
+        }
+    }
+        break;
+    case OLED_ANIM_SPARKLE:
+    {
+        for ( uint8_t col = 0U; col < OLED_COLS; ++col )
+        {
+            uint16_t rnd = (uint16_t)(g_spark_lfsr + (uint16_t)(col * 73U));
+            uint8_t *cell = &row_buf[col * OLED_CELL_W];
+            if ( (rnd & 0x0700U) == 0U )
+            {
+                /* occasional sparkle cluster */
+                cell[1U] = 0x18U;
+                cell[2U] = 0x3CU;
+                cell[3U] = 0x18U;
+            }
+            else if ( (rnd & 0x0030U) == 0x0030U )
+            {
+                cell[2U] = 0x18U; /* single sparkle */
+            }
+        }
+    }
+        break;
+    case OLED_ANIM_GRADIENT:
+    {
+        /* Horizontal gradient bar: three thin bands varying with offset */
+        for ( uint8_t col = 0U; col < OLED_COLS; ++col )
+        {
+            uint8_t hue_step = (uint8_t)(col + g_grad_offset);
+            uint8_t *cell = &row_buf[col * OLED_CELL_W];
+            /* Convert pseudo-hue step to brightness pattern */
+            uint8_t b0 = (uint8_t)(((hue_step >> 0U) & 1U) ? 0x7CU : 0x10U);
+            uint8_t b1 = (uint8_t)(((hue_step >> 1U) & 1U) ? 0x38U : 0x00U);
+            uint8_t b2 = (uint8_t)(((hue_step >> 2U) & 1U) ? 0x18U : 0x00U);
+            cell[1U] = b0;
+            cell[2U] = b1;
+            cell[3U] = b2;
+        }
+    }
+        break;
+    default:
+        break;
+    }
+
+    oled_set_cursor(0, row);
+    oled_write_raw((const char *)row_buf, sizeof(row_buf));
 }
 
 #endif /* OLED_ENABLE */
@@ -276,10 +424,16 @@ layer_state_t layer_state_set_user(layer_state_t state)
 #ifdef OLED_ENABLE
 /**
  * @brief OLED frame task: 21x4 layout
- * Row 0: ID:[Left|Right] Layer:<name>
- * Row 1: RGB:[On|Off]  Mode:<name> (truncated)
- * Row 2: Hue:FF Sat:FF Val:FF (hex)
- * Row 3: 8x8 stick figure animation at bottom-right corner
+ * Left OLED:
+ *   Row 0: "Left Layer <name>"
+ *   Row 1: "RGB Mode:<name>" (truncated)
+ *   Row 2: "Hue:FF Sat:FF Val:FF" (hex)
+ *   Row 3: empty
+ * Right OLED:
+ *   Row 0: "Right Layer <name>"
+ *   Row 1: empty
+ *   Row 2: empty
+ *   Row 3: Pac-Man animation traversing food pellets
  * @return false to allow default handling to continue
  */
 bool oled_task_user(void)
@@ -290,29 +444,36 @@ bool oled_task_user(void)
 
     oled_clear();
 
+    if ( g_anim_fullscreen )
+    {
+        /* Full-screen animation mode: all four rows animated on both halves */
+        for ( uint8_t r = 0U; r < OLED_ROWS; ++r )
+        {
+            draw_anim_row(r);
+        }
+        return false;
+    }
+
     if ( is_keyboard_master() )
     {
-        /* LEFT (master) */
-        /* Row 0: Left Layer <name> */
+        /* LEFT (master) informational rows */
         (void)snprintf(line, sizeof(line), "Left Layer %s", layer_name);
         pad_or_trunc_to_oled_cols(line);
         oled_set_cursor(0, 0);
         oled_write_ln(line, false);
 
-        /* Row 1: RGB Mode:<name> */
 #ifdef RGB_MATRIX_ENABLE
         {
             const char *mode_name = rgb_matrix_get_mode_name(rgb_matrix_get_mode());
             (void)snprintf(line, sizeof(line), "RGB Mode:%s", mode_name);
         }
 #else
-        (void)snprintf(line, sizeof(line), "RGB Mode:%s", "N/A");
+        (void)snprintf(line, sizeof(line), "RGB:%s", "N/A");
 #endif
         pad_or_trunc_to_oled_cols(line);
         oled_set_cursor(0, 1);
         oled_write_ln(line, false);
 
-        /* Row 2: Hue:FF Sat:FF Val:FF */
 #ifdef RGB_MATRIX_ENABLE
         (void)snprintf(line, sizeof(line), "Hue:%02X Sat:%02X Val:%02X",
                        (unsigned int)rgb_matrix_config.hsv.h,
@@ -325,41 +486,29 @@ bool oled_task_user(void)
         oled_set_cursor(0, 2);
         oled_write_ln(line, false);
 
-        /* Row 3: Empty */
-        memset(line, ' ', OLED_COLS);
-        line[OLED_COLS] = '\0';
-        oled_set_cursor(0, 3);
-        oled_write(line, false);
+        /* Row 3: animation (shared across halves) */
+        draw_anim_row(3U);
     }
     else
     {
-        /* RIGHT (slave) */
-        /* Row 0: Right Layer <name> */
+        /* RIGHT (slave) minimal info + animation */
         (void)snprintf(line, sizeof(line), "Right Layer %s", layer_name);
         pad_or_trunc_to_oled_cols(line);
         oled_set_cursor(0, 0);
         oled_write_ln(line, false);
 
-        /* Row 1: Empty */
         memset(line, ' ', OLED_COLS);
         line[OLED_COLS] = '\0';
         oled_set_cursor(0, 1);
         oled_write(line, false);
 
-        /* Row 2: Empty */
         memset(line, ' ', OLED_COLS);
         line[OLED_COLS] = '\0';
         oled_set_cursor(0, 2);
         oled_write(line, false);
 
-        /* Row 3: 8x8 animation bottom-right */
-        memset(line, ' ', OLED_COLS);
-        line[OLED_COLS] = '\0';
-        oled_set_cursor(0, 3);
-        oled_write(line, false);
-        draw_stick_bottom_right();
+        draw_anim_row(3U);
     }
-
     return false;
 }
 #endif /* OLED_ENABLE */
@@ -374,9 +523,29 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
 {
     bool result = true; /* MISRA: single exit point */
 
-#ifdef RGB_MATRIX_ENABLE
     if ( record->event.pressed )
     {
+        /* OLED Animation controls (always available when compiled with OLED) */
+        switch ( keycode )
+        {
+        case D_ANIM_NEXT:
+            g_oled_anim = (uint8_t)((g_oled_anim + 1U) % OLED_ANIM_COUNT);
+            result = false;
+            break;
+        case D_ANIM_PREV:
+            g_oled_anim = (uint8_t)((g_oled_anim + OLED_ANIM_COUNT - 1U) % OLED_ANIM_COUNT);
+            result = false;
+            break;
+        case D_ANIM_MODE:
+            g_anim_fullscreen = !g_anim_fullscreen;
+            result = false;
+            break;
+        default:
+            /* continue */
+            break;
+        }
+
+#ifdef RGB_MATRIX_ENABLE
         switch ( keycode )
         {
         case D_RGB_TOG:
@@ -432,7 +601,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
             /* no action */
             break;
         }
-    }
 #endif
+    }
     return result;
 }

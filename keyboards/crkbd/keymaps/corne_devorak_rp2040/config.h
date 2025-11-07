@@ -14,8 +14,10 @@
 #define PRODUCT      "corne_devorak_rp2040"
 
 /* ========================= Tapping/Behavior (opt) ========================= */
-// #define TAPPING_TERM 180
-// #define PERMISSIVE_HOLD
+/* Tapping configuration for dual-function Space (LT(NAV, KC_SPC)) */
+#define TAPPING_TERM 180          /* ms window to decide tap vs hold */
+#define HOLD_ON_OTHER_KEY_PRESS   /* treat as hold if another key is pressed during tap window */
+#define PERMISSIVE_HOLD           /* favor hold when rolling quickly to another key */
 
 /* ======================= RGB Matrix Configuration ========================= */
 #ifdef RGB_MATRIX_ENABLE
