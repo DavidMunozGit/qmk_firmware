@@ -96,49 +96,49 @@ const uint16_t PROGMEM keymaps[KB_LYR_MAX][MATRIX_ROWS][MATRIX_COLS] = {
         KC_ESC,  KC_QUOT, KC_COMM, KC_DOT, KC_P, KC_Y,                         KC_F, KC_G, KC_C, KC_R, KC_L, KC_BSPC,
         MT(MOD_LSFT, KC_TAB), KC_A, KC_O, KC_E, KC_U, KC_I,                    KC_D, KC_H, KC_T, KC_N, KC_S, KC_DEL,
         KC_LCTL, KC_SCLN, KC_Q, KC_J, KC_K, KC_X,                              KC_B, KC_M, KC_W, KC_V, KC_Z, MT(MOD_RSFT, KC_SLSH),
-            KC_LGUI, MO(KB_LYR_NUMS), LT(KB_LYR_NAV, KC_SPC),                  LT(KB_LYR_FUNC, KC_ENT), LT(KB_LYR_SYM, KC_LBRC), MT(MOD_RALT, KC_9)
+            KC_LGUI, LT(KB_LYR_NUMS, KC_MINS), LT(KB_LYR_NAV, KC_SPC),         LT(KB_LYR_FUNC, KC_ENT), LT(KB_LYR_SYM, KC_LBRC), MT(MOD_RALT, KC_9)
     ),
 
     [KB_LYR_NUMS] = LAYOUT_split_3x6_3(
         KC_ESC,  KC_LABK, KC_PSLS, KC_PMNS, KC_PIPE, KC_TILD,                  XXXXXXX, KC_P7,  KC_P8,  KC_P9,  KC_EQL, KC_BSPC,
         MT(MOD_LSFT, KC_TAB), KC_RABK, KC_PAST, KC_PPLS, KC_AMPR, KC_EXLM,     KC_PDOT, KC_P4,  KC_P5,  KC_P6,  XXXXXXX, KC_DEL,
         KC_LCTL, KC_LBRC, KC_LPRN, KC_CIRC, KC_PEQL, KC_PERC,                  XXXXXXX, KC_P1,  KC_P2,  KC_P3,  XXXXXXX, MT(MOD_RSFT, XXXXXXX),
-                                   KC_LGUI, XXXXXXX, XXXXXXX,                  KC_PENT, LT(KB_LYR_RGB, KC_P0), MOD_RALT 
+                                   KC_LGUI, XXXXXXX, XXXXXXX,                  KC_PENT, LT(KB_LYR_RGB, KC_P0), KC_RALT
     ),
 
     [KB_LYR_SYM] = LAYOUT_split_3x6_3(
         KC_ESC,  XXXXXXX, XXXXXXX, KC_MINS, XXXXXXX, XXXXXXX,                  KC_BSLS, XXXXXXX, KC_NUHS, XXXXXXX, XXXXXXX, KC_BSPC,
         MT(MOD_LSFT, KC_TAB), KC_RBRC,  KC_ASTR,  XXXXXXX,  XXXXXXX,  XXXXXXX, KC_SLSH, KC_AT,  KC_HASH, XXXXXXX, KC_DLR, KC_DEL,
         KC_LCTL, KC_LBRC, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                   KC_NUBS, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  MT(MOD_RSFT, XXXXXXX),
-                                XXXXXXX, XXXXXXX, XXXXXXX,                     XXXXXXX, XXXXXXX, MOD_RALT 
+                                XXXXXXX, XXXXXXX, XXXXXXX,                     XXXXXXX, XXXXXXX, KC_RALT
     ),
 
     [KB_LYR_NAV] = LAYOUT_split_3x6_3(
         KC_ESC,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                  XXXXXXX, KC_HOME, KC_UP,   KC_END,  KC_PGUP, KC_BSPC,
         MT(MOD_LSFT, KC_TAB), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,     C(KC_LEFT), KC_LEFT, KC_DOWN, KC_RGHT, C(KC_RGHT), KC_DEL,
         KC_LCTL, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                  C(KC_X), C(S(KC_UP)), C(S(KC_BSLS)), C(S(KC_DOWN)), KC_PGDN, MT(MOD_RSFT, KC_ENT),
-                                   KC_LGUI, MO(KB_LYR_MOUSE), XXXXXXX,         C(KC_C), C(KC_V), MOD_RALT 
+                                   KC_LGUI, MO(KB_LYR_MOUSE), XXXXXXX,         C(KC_C), C(KC_V), KC_RALT
     ),
 
     [KB_LYR_FUNC] = LAYOUT_split_3x6_3(
         KC_ESC,  KC_CAPS,  KC_INS,  XXXXXXX,  KC_MSTP, KC_MNXT,               KC_VOLU, KC_F7,  KC_F8,  KC_F9,  KC_F12, KC_PSCR,
         MT(MOD_LSFT, KC_TAB), KC_SCRL, KC_PAUS, KC_APP, KC_MPLY, KC_MPRV,     KC_VOLD, KC_F4,  KC_F5,  KC_F6,  KC_F11, XXXXXXX,
         KC_LCTL, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                  KC_MUTE, KC_F1,  KC_F2,  KC_F3,  KC_F10, MT(MOD_RSFT, XXXXXXX),
-                                   KC_LGUI, XXXXXXX, XXXXXXX,                  XXXXXXX, XXXXXXX, MOD_RALT 
+                                   KC_LGUI, XXXXXXX, XXXXXXX,                  XXXXXXX, XXXXXXX, KC_RALT
     ),
 
     [KB_LYR_RGB] = LAYOUT_split_3x6_3(
         KC_ESC,  D_RGB_TOG, D_RGB_HUI, D_RGB_SAI, D_RGB_VAI, D_RGB_MOD,                 XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
         MT(MOD_LSFT, KC_TAB), D_RGB_RMOD, D_RGB_HUD, D_RGB_SAD, D_RGB_VAD,  XXXXXXX,    XXXXXXX, D_ANIM_MODE, D_ANIM_PREV, D_ANIM_NEXT, XXXXXXX, XXXXXXX,
         KC_LCTL, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                           XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, MT(MOD_RSFT, XXXXXXX),
-                                   KC_LGUI, XXXXXXX, XXXXXXX,                           XXXXXXX, XXXXXXX, MOD_RALT 
+                                   KC_LGUI, XXXXXXX, XXXXXXX,                           XXXXXXX, XXXXXXX, KC_RALT
     ),
 
     [KB_LYR_MOUSE] = LAYOUT_split_3x6_3(
-        KC_ESC,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                  XXXXXXX, MS_WHLL, MS_WHLU, MS_WHLD, MS_WHLR, KC_BSPC,
-        MT(MOD_LSFT, KC_TAB), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,     MS_BTN2, MS_LEFT, MS_DOWN, MS_UP, MS_RGHT, KC_DEL,
-        KC_LCTL, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, MT(MOD_RSFT, XXXXXXX),
-                                   KC_LGUI, XXXXXXX, XXXXXXX,                  MS_BTN1, MS_BTN3, KC_RALT
+        KC_ESC,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                  XXXXXXX, XXXXXXX, MS_UP, XXXXXXX, MS_WHLU, KC_BSPC,
+        MT(MOD_LSFT, KC_TAB), MS_ACL0, MS_ACL1, MS_ACL2, XXXXXXX, XXXXXXX,     MS_WHLL, MS_LEFT, MS_DOWN, MS_RGHT, MS_WHLR, KC_DEL,
+        KC_LCTL, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, MS_WHLD, MT(MOD_RSFT, XXXXXXX),
+                                   KC_LGUI, XXXXXXX, XXXXXXX,                  MS_BTN1, MS_BTN2, KC_RALT
     )
 };
 /* clang-format on */
