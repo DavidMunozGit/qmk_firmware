@@ -1,6 +1,6 @@
 /**
  * @file config.h
- * @brief Keymap-level configuration for corne_devorak_rp2040.
+ * @brief Keymap-level configuration for corne_dvorak_rp2040.
  *
  * Sections: Identity, Tapping, RGB Matrix, OLED, Split, Notes.
  */
@@ -11,7 +11,7 @@
 #undef MANUFACTURER
 #undef PRODUCT
 #define MANUFACTURER "dmunoz"
-#define PRODUCT      "corne_devorak_rp2040"
+#define PRODUCT      "corne_dvorak_rp2040"
 
 /* ========================= Tapping/Behavior (opt) ========================= */
 /* Tapping configuration for dual-function Space (LT(NAV, KC_SPC)) */

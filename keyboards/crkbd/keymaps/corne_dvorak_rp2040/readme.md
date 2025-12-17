@@ -1,9 +1,9 @@
 <!--
  @file readme.md
- @brief Overview and usage notes for the corne_devorak_rp2040 keymap.
+ @brief Overview and usage notes for the corne_dvorak_rp2040 keymap.
 -->
 
-## corne_devorak_rp2040
+## corne_dvorak_rp2040
 
 Personal Dvorak layout for Corne (crkbd) using RP2040 Pro Micro-compatible controllers.
 
@@ -14,7 +14,7 @@ Personal Dvorak layout for Corne (crkbd) using RP2040 Pro Micro-compatible contr
 - Split keyboard with WPM/OLED data mirrored between halves
 
 ### Build
-- qmk compile -kb crkbd/rev1 -km corne_devorak_rp2040
+- qmk compile -kb crkbd/rev1 -km corne_dvorak_rp2040
 
 This produces a UF2 suitable for RP2040 when used with the converter target (see `rules.mk`).
 

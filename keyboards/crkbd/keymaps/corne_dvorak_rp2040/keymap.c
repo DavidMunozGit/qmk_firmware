@@ -9,7 +9,7 @@
  */
 
  /* Helper for compilation:
-  * bash -lc 'cd /home/dmunoz/Keyboard/qmk_firmware && make -j4 crkbd:corne_devorak_rp2040 CONVERT_TO=sparkfun_pm2040' */
+  * bash -lc 'cd /home/dmunoz/Keyboard/qmk_firmware && make -j4 crkbd:corne_dvorak_rp2040 CONVERT_TO=sparkfun_pm2040' */
 
 /* ========================================================================== */
 /*                                Includes                                    */

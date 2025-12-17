@@ -1,6 +1,6 @@
 ###############################################################################
 # @file rules.mk
-# @brief Build rules for corne_devorak_rp2040 keymap.
+# @brief Build rules for corne_dvorak_rp2040 keymap.
 ###############################################################################
 
 # Target: RP2040 Pro Micro-compatible (SparkFun Pro Micro RP2040)
