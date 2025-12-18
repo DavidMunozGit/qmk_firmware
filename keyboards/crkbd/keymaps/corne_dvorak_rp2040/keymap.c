@@ -407,20 +407,24 @@ static void key_label_3(uint16_t kc, char out[4])
         const uint8_t mods = QK_MODS_GET_MODS(kc);
         const uint16_t base = QK_MODS_GET_BASIC_KEYCODE(kc);
 
-        /* QK_MODS embeds its own 5-bit mod flags (MOD_LCTL/MOD_LSFT/...)
-         * which are NOT the same as runtime MOD_MASK_*.
-         */
-        const uint8_t mods_shift = (uint8_t)(MOD_LSFT | MOD_RSFT);
-        const uint8_t mods_ctrl  = (uint8_t)(MOD_LCTL | MOD_RCTL);
-        const uint8_t mods_alt   = (uint8_t)(MOD_LALT | MOD_RALT);
-        const uint8_t mods_gui   = (uint8_t)(MOD_LGUI | MOD_RGUI);
-
-        /* If this is shift-only, prefer showing the shifted symbol directly. */
-        if ( (mods & (uint8_t)~mods_shift) == 0U && (mods & mods_shift) != 0U )
+        /* Special-cases to show the actual shifted symbol with 3 chars. */
+        if ( mods == MOD_MASK_SHIFT )
         {
-            uint16_t shifted = apply_shift_to_keycode(base);
-            key_label_3(shifted, out);
-            return;
+            if ( base == KC_GRV )
+            {
+                memcpy(out, " ~ ", 4);
+                return;
+            }
+            if ( base == KC_COMM )
+            {
+                memcpy(out, " < ", 4);
+                return;
+            }
+            if ( base == KC_DOT )
+            {
+                memcpy(out, " > ", 4);
+                return;
+            }
         }
 
         /* If this is a pure modifier (no base key), render the mod name. */
@@ -439,10 +443,10 @@ static void key_label_3(uint16_t kc, char out[4])
         key_label_3(base, base_lbl);
 
         char prefix = 'M';
-        if ( (mods & (uint8_t)~mods_ctrl) == 0U && (mods & mods_ctrl) != 0U ) prefix = 'C';
-        else if ( (mods & (uint8_t)~mods_shift) == 0U && (mods & mods_shift) != 0U ) prefix = 'S';
-        else if ( (mods & (uint8_t)~mods_alt) == 0U && (mods & mods_alt) != 0U ) prefix = 'A';
-        else if ( (mods & (uint8_t)~mods_gui) == 0U && (mods & mods_gui) != 0U ) prefix = 'G';
+        if ( mods == MOD_MASK_CTRL ) prefix = 'C';
+        else if ( mods == MOD_MASK_SHIFT ) prefix = 'S';
+        else if ( mods == MOD_MASK_ALT ) prefix = 'A';
+        else if ( mods == MOD_MASK_GUI ) prefix = 'G';
 
         char c1 = ' ';
         char c2 = ' ';
