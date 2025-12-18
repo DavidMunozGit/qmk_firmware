@@ -297,45 +297,6 @@ static oled_anim_e get_oled_anim_sel(void)
     return layer_state_is(KB_LYR_OLED_ANIM2) ? OLED_ANIM_SPINNER : OLED_ANIM_BOUNCE;
 }
 
-static uint8_t get_effective_mods(void)
-{
-    /* Include weak + oneshot mods so the OLED matches what you'd type. */
-    return (uint8_t)(get_mods() | get_weak_mods() | get_oneshot_mods());
-}
-
-static uint16_t apply_shift_to_keycode(uint16_t kc)
-{
-    /* Applies a US-ish shift transform for common keys.
-     * Note: host layouts can differ; this is best-effort for readability.
-     */
-    switch ( kc )
-    {
-    case KC_GRV:  return KC_TILD;
-    case KC_1:    return KC_EXLM;
-    case KC_2:    return KC_AT;
-    case KC_3:    return KC_HASH;
-    case KC_4:    return KC_DLR;
-    case KC_5:    return KC_PERC;
-    case KC_6:    return KC_CIRC;
-    case KC_7:    return KC_AMPR;
-    case KC_8:    return KC_ASTR;
-    case KC_9:    return KC_LPRN;
-    case KC_0:    return KC_RPRN;
-    case KC_MINS: return KC_UNDS;
-    case KC_EQL:  return KC_PLUS;
-    case KC_LBRC: return KC_LCBR;
-    case KC_RBRC: return KC_RCBR;
-    case KC_BSLS: return KC_PIPE;
-    case KC_SCLN: return KC_COLN;
-    case KC_QUOT: return KC_DQUO;
-    case KC_COMM: return KC_LT;
-    case KC_DOT:  return KC_GT;
-    case KC_SLSH: return KC_QUES;
-    default:
-        return kc;
-    }
-}
-
 static void key_label_3(uint16_t kc, char out[4])
 {
     /* Default: unknown */
@@ -356,41 +317,6 @@ static void key_label_3(uint16_t kc, char out[4])
         return;
     }
 
-    /* Decode layer momentary keys (MO(layer)) so they don't show as ??? */
-    if ( IS_QK_MOMENTARY(kc) )
-    {
-        uint8_t layer = QK_MOMENTARY_GET_LAYER(kc);
-        switch ( layer )
-        {
-        case KB_LYR_NUMS:
-            memcpy(out, "NUM", 4);
-            break;
-        case KB_LYR_SYM:
-            memcpy(out, "SYM", 4);
-            break;
-        case KB_LYR_NAV:
-            memcpy(out, "NAV", 4);
-            break;
-        case KB_LYR_FUNC:
-            memcpy(out, "FUN", 4);
-            break;
-        case KB_LYR_RGB:
-            memcpy(out, "RGB", 4);
-            break;
-        case KB_LYR_MOUSE:
-            memcpy(out, "MOU", 4);
-            break;
-        default:
-            /* Generic: M00..M31 */
-            out[0] = 'M';
-            out[1] = (char)('0' + ((layer / 10U) % 10U));
-            out[2] = (char)('0' + (layer % 10U));
-            out[3] = '\0';
-            break;
-        }
-        return;
-    }
-
     /* Decode simple MT/LT wrappers into their tap key. */
     if ( (kc & 0xFF00U) == (QK_MOD_TAP & 0xFF00U) )
     {
@@ -399,74 +325,6 @@ static void key_label_3(uint16_t kc, char out[4])
     else if ( (kc & 0xFF00U) == (QK_LAYER_TAP & 0xFF00U) )
     {
         kc = (uint16_t)(kc & 0xFFU);
-    }
-
-    /* Decode modifier-chorded keycodes like C(KC_LEFT), S(KC_COMM), etc. */
-    if ( IS_QK_MODS(kc) )
-    {
-        const uint8_t mods = QK_MODS_GET_MODS(kc);
-        const uint16_t base = QK_MODS_GET_BASIC_KEYCODE(kc);
-
-        /* Special-cases to show the actual shifted symbol with 3 chars. */
-        if ( mods == MOD_MASK_SHIFT )
-        {
-            if ( base == KC_GRV )
-            {
-                memcpy(out, " ~ ", 4);
-                return;
-            }
-            if ( base == KC_COMM )
-            {
-                memcpy(out, " < ", 4);
-                return;
-            }
-            if ( base == KC_DOT )
-            {
-                memcpy(out, " > ", 4);
-                return;
-            }
-        }
-
-        /* If this is a pure modifier (no base key), render the mod name. */
-        if ( base == KC_NO )
-        {
-            if ( mods == MOD_MASK_CTRL ) memcpy(out, "CTL", 4);
-            else if ( mods == MOD_MASK_SHIFT ) memcpy(out, "SFT", 4);
-            else if ( mods == MOD_MASK_ALT ) memcpy(out, "ALT", 4);
-            else if ( mods == MOD_MASK_GUI ) memcpy(out, "GUI", 4);
-            else memcpy(out, "MOD", 4);
-            return;
-        }
-
-        /* Compact representation: prefix + 2 chars from base label */
-        char base_lbl[4];
-        key_label_3(base, base_lbl);
-
-        char prefix = 'M';
-        if ( mods == MOD_MASK_CTRL ) prefix = 'C';
-        else if ( mods == MOD_MASK_SHIFT ) prefix = 'S';
-        else if ( mods == MOD_MASK_ALT ) prefix = 'A';
-        else if ( mods == MOD_MASK_GUI ) prefix = 'G';
-
-        char c1 = ' ';
-        char c2 = ' ';
-        for ( uint8_t i = 0U; i < 3U; ++i )
-        {
-            if ( base_lbl[i] == ' ' ) continue;
-            if ( c1 == ' ' ) c1 = base_lbl[i];
-            else {
-                c2 = base_lbl[i];
-                break;
-            }
-        }
-        if ( c1 == ' ' ) c1 = '?';
-        if ( c2 == ' ' ) c2 = '?';
-
-        out[0] = prefix;
-        out[1] = c1;
-        out[2] = c2;
-        out[3] = '\0';
-        return;
     }
 
     if ( kc >= KC_A && kc <= KC_Z )
@@ -494,21 +352,6 @@ static void key_label_3(uint16_t kc, char out[4])
     case KC_ENT:  memcpy(out, "ENT", 4); break;
     case KC_BSPC: memcpy(out, "BSP", 4); break;
     case KC_DEL:  memcpy(out, "DEL", 4); break;
-    case KC_INS:  memcpy(out, "INS", 4); break;
-    case KC_CAPS: memcpy(out, "CAP", 4); break;
-    case KC_PSCR: memcpy(out, "PRT", 4); break;
-    case KC_SCRL: memcpy(out, "SCR", 4); break;
-    case KC_PAUS: memcpy(out, "PAU", 4); break;
-    case KC_APP:  memcpy(out, "APP", 4); break;
-
-    case KC_HOME: memcpy(out, "HOM", 4); break;
-    case KC_END:  memcpy(out, "END", 4); break;
-    case KC_PGUP: memcpy(out, "PGU", 4); break;
-    case KC_PGDN: memcpy(out, "PGD", 4); break;
-    case KC_UP:   memcpy(out, "UP ", 4); break;
-    case KC_DOWN: memcpy(out, "DWN", 4); break;
-    case KC_LEFT: memcpy(out, "LFT", 4); break;
-    case KC_RGHT: memcpy(out, "RGT", 4); break;
     case KC_MINS: memcpy(out, " - ", 4); break;
     case KC_EQL:  memcpy(out, " = ", 4); break;
     case KC_LBRC: memcpy(out, " [ ", 4); break;
@@ -519,10 +362,6 @@ static void key_label_3(uint16_t kc, char out[4])
     case KC_RCBR: memcpy(out, " } ", 4); break;
     case KC_SLSH: memcpy(out, " / ", 4); break;
     case KC_BSLS: memcpy(out, "\\ ", 3); out[2] = ' '; out[3] = '\0'; break;
-    case KC_GRV:  memcpy(out, " ` ", 4); break;
-    case KC_TILD: memcpy(out, " ~ ", 4); break;
-    case KC_LT:   memcpy(out, " < ", 4); break;
-    case KC_GT:   memcpy(out, " > ", 4); break;
     case KC_COMM: memcpy(out, " , ", 4); break;
     case KC_DOT:  memcpy(out, " . ", 4); break;
     case KC_QUOT: memcpy(out, " ' ", 4); break;
@@ -539,114 +378,9 @@ static void key_label_3(uint16_t kc, char out[4])
     case KC_PLUS: memcpy(out, " + ", 4); break;
     case KC_UNDS: memcpy(out, " _ ", 4); break;
     case KC_PIPE: memcpy(out, " | ", 4); break;
-
-    /* Function/media/brightness */
-    case KC_F1:  memcpy(out, "F1 ", 4); break;
-    case KC_F2:  memcpy(out, "F2 ", 4); break;
-    case KC_F3:  memcpy(out, "F3 ", 4); break;
-    case KC_F4:  memcpy(out, "F4 ", 4); break;
-    case KC_F5:  memcpy(out, "F5 ", 4); break;
-    case KC_F6:  memcpy(out, "F6 ", 4); break;
-    case KC_F7:  memcpy(out, "F7 ", 4); break;
-    case KC_F8:  memcpy(out, "F8 ", 4); break;
-    case KC_F9:  memcpy(out, "F9 ", 4); break;
-    case KC_F10: memcpy(out, "F10", 4); break;
-    case KC_F11: memcpy(out, "F11", 4); break;
-    case KC_F12: memcpy(out, "F12", 4); break;
-
-    case KC_MUTE: memcpy(out, "MUT", 4); break;
-    case KC_VOLU: memcpy(out, "V+ ", 4); break;
-    case KC_VOLD: memcpy(out, "V- ", 4); break;
-    case KC_MPLY: memcpy(out, "PLY", 4); break;
-    case KC_MPRV: memcpy(out, "PRV", 4); break;
-    case KC_MNXT: memcpy(out, "NXT", 4); break;
-    case KC_MSTP: memcpy(out, "STP", 4); break;
-    case KC_BRIU: memcpy(out, "BR+", 4); break;
-    case KC_BRID: memcpy(out, "BR-", 4); break;
-
-    /* Mouse layer */
-    case MS_UP:   memcpy(out, "MUP", 4); break;
-    case MS_DOWN: memcpy(out, "MDN", 4); break;
-    case MS_LEFT: memcpy(out, "MLF", 4); break;
-    case MS_RGHT: memcpy(out, "MRT", 4); break;
-    case MS_WHLL: memcpy(out, "WHL", 4); break;
-    case MS_WHLR: memcpy(out, "WHR", 4); break;
-    case MS_WHLU: memcpy(out, "WHU", 4); break;
-    case MS_WHLD: memcpy(out, "WHD", 4); break;
-    case MS_BTN1: memcpy(out, "B1 ", 4); break;
-    case MS_BTN2: memcpy(out, "B2 ", 4); break;
-    case MS_BTN3: memcpy(out, "B3 ", 4); break;
-    case MS_BTN4: memcpy(out, "B4 ", 4); break;
-    case MS_BTN5: memcpy(out, "B5 ", 4); break;
-    case MS_ACL0: memcpy(out, "AC0", 4); break;
-    case MS_ACL1: memcpy(out, "AC1", 4); break;
-    case MS_ACL2: memcpy(out, "AC2", 4); break;
-
-    /* RGB/custom controls */
-    case D_RGB_TOG:  memcpy(out, "RTG", 4); break;
-    case D_RGB_HUI:  memcpy(out, "H+ ", 4); break;
-    case D_RGB_HUD:  memcpy(out, "H- ", 4); break;
-    case D_RGB_SAI:  memcpy(out, "S+ ", 4); break;
-    case D_RGB_SAD:  memcpy(out, "S- ", 4); break;
-    case D_RGB_VAI:  memcpy(out, "V+ ", 4); break;
-    case D_RGB_VAD:  memcpy(out, "V- ", 4); break;
-    case D_RGB_MOD:  memcpy(out, "M+ ", 4); break;
-    case D_RGB_RMOD: memcpy(out, "M- ", 4); break;
-    case D_OLED_MODE: memcpy(out, "OLM", 4); break;
-    case D_ANIM_NEXT: memcpy(out, "A+ ", 4); break;
-    case D_ANIM_PREV: memcpy(out, "A- ", 4); break;
     default:
         /* keep ??? */
         break;
-    }
-}
-
-static void key_label_3_with_mods(uint16_t kc, uint8_t mods, char out[4])
-{
-    /* First render the key as-is (handles wrappers like LT/MT, QK_MODS, etc). */
-    key_label_3(kc, out);
-
-    /* If Shift is held, try to render the shifted symbol for plain keycodes.
-     * We intentionally do not try to "shift" custom keycodes.
-     */
-    if ( (mods & MOD_MASK_SHIFT) == 0U )
-    {
-        return;
-    }
-
-    /* If it's a known wrapper we can re-derive a base keycode from, do so.
-     * Otherwise, only apply mapping when the keycode is a basic KC_*.
-     */
-    uint16_t base = kc;
-
-    if ( (base & 0xFF00U) == (QK_MOD_TAP & 0xFF00U) )
-    {
-        base = (uint16_t)(base & 0xFFU);
-    }
-    else if ( (base & 0xFF00U) == (QK_LAYER_TAP & 0xFF00U) )
-    {
-        base = (uint16_t)(base & 0xFFU);
-    }
-    else if ( IS_QK_MODS(base) )
-    {
-        /* Already includes explicit mods; don't double-apply shift. */
-        return;
-    }
-    else if ( IS_QK_MOMENTARY(base) )
-    {
-        return;
-    }
-
-    /* Letters: key_label_3 already shows uppercase A-Z, so nothing to do. */
-    if ( base >= KC_A && base <= KC_Z )
-    {
-        return;
-    }
-
-    uint16_t shifted = apply_shift_to_keycode(base);
-    if ( shifted != base )
-    {
-        key_label_3(shifted, out);
     }
 }
 
@@ -742,7 +476,6 @@ static void draw_support_view(bool is_left)
     uint8_t lyr = get_highest_real_layer();
     const char *layer_name = get_layer_name(lyr);
     char lbl[4];
-    uint8_t mods = get_effective_mods();
 
     for ( uint8_t row = 0U; row < 3U; ++row )
     {
@@ -751,7 +484,7 @@ static void draw_support_view(bool is_left)
         {
             for ( uint8_t col = 1U; col < 6U; ++col )
             {
-                key_label_3_with_mods(keymaps[lyr][row][col], mods, lbl);
+                key_label_3(keymaps[lyr][row][col], lbl);
                 strcat(line, lbl);
                 if ( col < 5U ) strcat(line, " ");
             }
@@ -764,7 +497,7 @@ static void draw_support_view(bool is_left)
             uint8_t matrix_row = (uint8_t)(row + 4U);
             for ( int8_t col = 5; col >= 1; --col )
             {
-                key_label_3_with_mods(keymaps[lyr][matrix_row][(uint8_t)col], mods, lbl);
+                key_label_3(keymaps[lyr][matrix_row][(uint8_t)col], lbl);
                 strcat(line, lbl);
                 if ( col > 1 ) strcat(line, " ");
             }
