@@ -9,6 +9,15 @@
 
 /* =============================== Identity ================================= */
 #undef MANUFACTURER
+
+/* Mouse key tuning: make acceleration levels distinct and responsive */
+#define MOUSEKEY_DELAY             50
+#define MOUSEKEY_INTERVAL          16
+#define MOUSEKEY_MAX_SPEED         10
+#define MOUSEKEY_TIME_TO_MAX       120
+#define MOUSEKEY_MOVE_DELTA        8
+#define MOUSEKEY_WHEEL_MAX_SPEED   8
+#define MOUSEKEY_WHEEL_TIME_TO_MAX 100
 #undef PRODUCT
 #define MANUFACTURER "dmunoz"
 #define PRODUCT      "corne_dvorak_rp2040"
