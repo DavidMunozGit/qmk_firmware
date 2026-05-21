@@ -22,6 +22,10 @@
 #define MANUFACTURER "dmunoz"
 #define PRODUCT      "corne_dvorak_rp2040"
 
+/* Override serial pin for split communication */
+#undef SOFT_SERIAL_PIN
+#define SOFT_SERIAL_PIN B5
+
 /* ========================= Tapping/Behavior (opt) ========================= */
 /* Tapping configuration for dual-function Space (LT(NAV, KC_SPC)) */
 #define TAPPING_TERM 180          /* ms window to decide tap vs hold */
